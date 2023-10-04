@@ -106,7 +106,7 @@ pub struct NormalizedString {
 /// The highest amount of letters that the client will allow in both the username
 /// and password fields.
 /// Always 16.
-pub const MAXIMUM_STRING_LENGTH_IN_BYTES: u8 = 16;
+pub const MAXIMUM_STRING_LENGTH_IN_BYTES: u8 = u8::MAX;
 
 impl NormalizedString {
     /// Checks for non-ASCII characters and too large of a string
@@ -125,13 +125,8 @@ impl NormalizedString {
 
             let mut array = [0_u8; MAXIMUM_STRING_LENGTH_IN_BYTES as usize];
 
-            for (i, c) in s.chars().enumerate() {
-                if !c.is_ascii() || c.is_ascii_control() {
-                    return Err(NormalizedStringError::CharacterNotAllowed(c));
-                }
-
-                array[i] = c.to_ascii_uppercase() as u8;
-            }
+            let s = s.to_ascii_uppercase();
+            array[..s.len()].copy_from_slice(s.as_bytes());
 
             Ok(NormalizedString {
                 s: array,
